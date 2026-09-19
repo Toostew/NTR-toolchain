@@ -8,11 +8,19 @@
 #include <unordered_map>
 #include <string>
 #include <vector>
+#include <memory>
 
 
 struct fileEntry{
 	std::string fileName;
-	std::ifstream inputStream;
+	std::unique_ptr<std::ifstream> fileStream;
+};
+
+enum class directiveType {
+	INCLUDE,
+	DEFINE,
+	UNDEFINE,
+	NON_DIRECTIVE
 };
 
 
@@ -42,9 +50,10 @@ class PreProcessor {
 	
 	private:
 		MacroTable macroTable; //macrotable instance
-		std::vector<fileEntry> stack; //psuedostack using a vector instead
+		std::vector<fileEntry> fileEntryStack; //psuedostack using a vector instead
 
-		bool isDirective(std::string line); //check if line is a directive, as in starts with # like #include
+		directiveType getLineDirective(std::string line); //figures out what type of directive the line is
+
 
 		void includeHandler(std::string line); //function to handle include directives
 		void defineHandler(std::string line);  //handles defines
