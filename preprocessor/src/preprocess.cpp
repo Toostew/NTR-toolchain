@@ -10,15 +10,22 @@ MacroTable::MacroTable(){
 }
 
 std::string MacroTable::search(std::string key){
-	
+	auto iterator = hashmap.find(key);
+
+	if(iterator != hashmap.end()){
+		return iterator->second; //returns the value associated with iterator->first
+	} else {
+		return ""; //there's probably a more reliable return than just straight blank
+	}
+
 }
 
 void MacroTable::define(std::string key, std::string value){
-
+	hashmap[key] = value; //define the value to macro table
 }
 
-void undefine(std::string key){
-
+void MacroTable::undefine(std::string key){
+	hashmap.erase(key); //remove the std::pair of this key, which removes both key and value associated
 }
 
 
