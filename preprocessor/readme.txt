@@ -1,5 +1,21 @@
 this file outlines the design decisions for the preprocessor, as well as new concepts I encounter
 
+the Include, Define and undefine Handlers:
+   if you notice, all 3 handlers take arguments without quotations, and this is simply because of a simplification trade off:
+    the whole reason there's a need for it is to allow for special names that would otherwise wouldn't be supported. Take for
+    example #include. If I had #include "file name.txt", the #include should be able to parse the file name as file name.txt, which
+    is expected behaviour and you can see this in g++. however, because I am using istringstream, which conveniently splits
+    strings into distinct "chunks" seperated by whitespace, implementing this would be a bit of a headache, since it will split text
+    even when bounded by quotations. So the choice was either implement a way for whitespace to be ignored when bounded within quotations,
+    like "file name.txt", or just ban spaces outright; which is what I went for. Since spaces aren't allowed there really isn't any need
+    for quotations anymore. I do however plan to return and maybe reimplement this so you COULD allow whitespace, which means wrapping the
+    argument in quotations, but that's for another time.
+
+
+
+
+
+New concepts:
 
 cpp smart pointers: "oh my god"
 cpp introduces smart pointers, which are an evolution of the raw pointers seen in C. unlike raw pointers, where
@@ -40,6 +56,4 @@ from the fileEntry pointer stuff - dereference + member access in one operator).
 in short they're the general, uniform way the STL lets you walk through ANY
 container (vectors, maps, sets, etc) with the same syntax, regardless of how that container's actually laid
 out in memory. range-based for loops are secretly using iterators under the hood too, just hidden from view.
-
-
 

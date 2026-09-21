@@ -9,6 +9,7 @@
 #include <string>
 #include <vector>
 #include <memory>
+#include <sstream>
 
 
 struct fileEntry{
@@ -16,6 +17,7 @@ struct fileEntry{
 	std::unique_ptr<std::ifstream> fileStream;
 };
 
+//there are only 4 known directives, anything else is treated like regular text
 enum class directiveType {
 	INCLUDE,
 	DEFINE,
@@ -44,6 +46,7 @@ class MacroTable {
 class PreProcessor {
 	public:
 		PreProcessor();
+
 		void processFile(std::string inputFile, std::string outputFile); //this is the function that actually does shit
 
 
