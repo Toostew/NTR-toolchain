@@ -33,6 +33,7 @@ class MacroTable {
 		void define(std::string key, std::string value); //populate with entry
 		void undefine(std::string key); //remove entry
 
+		std::vector<std::string> getMacros(); //this function returns every single key from the hashmap
 
 
 	private:

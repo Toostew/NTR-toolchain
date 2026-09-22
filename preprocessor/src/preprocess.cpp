@@ -28,12 +28,22 @@ void MacroTable::undefine(std::string key){
 	hashmap.erase(key); //remove the std::pair of this key, which removes both key and value associated
 }
 
+std::vector<std::string> MacroTable::getMacros() {
+	std::vector<std::string> macros;
+
+	for (std::pair<std::string,std::string> entry : hashmap) {
+		macros.push_back(entry.first);
+	}
+
+	return macros;
+}
+
 
 
 
 //preprocessor
 PreProcessor::PreProcessor(){
-	
+
 }
 
 //scans the line for a directive.
@@ -162,14 +172,46 @@ void PreProcessor::processFile(std::string inputFile, std::string outputFile){
 			continue;
 		}
 
+		directiveType type = getLineDirective(buffer);
 
+		switch(type) {
+			case directiveType::INCLUDE:
+				includeHandler(buffer);
+				break;
+			case directiveType::DEFINE:
+				defineHandler(buffer);
+				break;
+			case directiveType::UNDEFINE:
+				undefineHandler(buffer);
+				break;
+			case directiveType::NON_DIRECTIVE:
+				//here we do macro expansion.
+
+
+				break;
+
+		}
 
 	}
+
+}
+
+std::string PreProcessor::expandMacro(std::string line) {
+	//this function expands the macro from its compact to full form
+	//we have to check the ENTIRE macrotable and search the line for each entry
 
 
 
 
 }
+
+std::string PreProcessor::stripComment(std::string line) {
+	//if it starts with a "//", like this comment, remove the remainder of the line
+	//be careful because we only need to remove it wherever the // begins, till end of line
+
+}
+
+
 
 
 

@@ -11,6 +11,14 @@ the Include, Define and undefine Handlers:
     for quotations anymore. I do however plan to return and maybe reimplement this so you COULD allow whitespace, which means wrapping the
     argument in quotations, but that's for another time.
 
+
+std::vector<std::string> MacroTable::getMacros():
+    this function irks me because I NEED to get a list of every single key from the macrotable in order to expand macros during preprocessing.
+    In order to keep the hashmap (unordered map) private I needed to expose a function that returns a list of every macro,
+     this function, when invoked will linearly catalog every single pair, and record pair.first
+    into a vector to be returned. This cataloging occurs EVERY TIME THE FUNCTION IS CALLED, so it's wildly inefficient. ideally, you'd want to save the keys
+    and have them persist in some way so that the lookup is instant O(1) and you dont have to constantly catalog them again. For now, I don't know how to do that
+
 Error codes:
     So far I've implemented some rudimentary error codes for debugging, they are:
     10: Cycle detected, specifically when a #include directive detects the same file within the file stack
