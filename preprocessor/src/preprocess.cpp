@@ -46,13 +46,13 @@ directiveType PreProcessor::getLineDirective(std::string line) {
 
 	lineStream >> bufferFirst; //load the first non-whitespaced full word
 
-	if (bufferFirst.compare("#include")) {
+	if (bufferFirst == "#include") {
 		return directiveType::INCLUDE;
 	}
-	else if (bufferFirst.compare("#define")) {
+	else if (bufferFirst == "#define") {
 		return directiveType::DEFINE;
 	}
-	else if (bufferFirst.compare("#undefine")) {
+	else if (bufferFirst == "#undefine") {
 		return directiveType::UNDEFINE;
 	} else {
 		return directiveType::NON_DIRECTIVE;
@@ -60,12 +60,54 @@ directiveType PreProcessor::getLineDirective(std::string line) {
 
 }
 
+//search the stack for the file. If it exists, 1. Otherwise 0
+//there should never be multiple of the same file to prevent cycles
+bool PreProcessor::searchFileEntryStack(std::string fileName) {
+
+	//const is like a declaration to say we will not modify anything related to fileEntry, and Auto& is reference to whatever variable this is (automatically detect)
+	for (const auto& fileEntry : fileEntryStack) {
+		if (fileEntry.fileName == fileName) {
+			return true;
+		}
+	}
+	return false;
+}
+
+
 void PreProcessor::includeHandler(std::string line) {
 	std::string buffer;
 	std::istringstream lineStream(line);
 
 	lineStream >> buffer >> buffer; //skip the #include, we should get a file name.
-	//at this point buffer should be populated with the name of the file
+	//at this point buffer should be populated with the name of the file,
+	//RULE: no quotations allowed for now (check readme)
+
+	//check for filename in stack
+	if (!PreProcessor::searchFileEntryStack(buffer)) {
+		//perfectly fine, continue on
+
+		std::unique_ptr<std::ifstream> openFileStream = std::make_unique<std::ifstream>(buffer);
+
+		//check to see if the file opens, hence actually exists/readable
+		if (!openFileStream->is_open()) {
+			//error, exit out
+			std::cerr << "Could not open file " << buffer << std::endl;
+			exit(20); //code 20 is special code for unable to open file
+		}
+
+		//file is actually openable, so we can add it to the stack
+		fileEntry wrapperEntry = {buffer, std::move(openFileStream)};
+
+		fileEntryStack.push_back(std::move(wrapperEntry));
+
+
+
+
+	} else {
+		//cycle detected, should error out
+		std::cerr << "Cycle detected for: " << buffer << ", quitting"<< std::endl;
+		exit(10); //code 10 is special code for cycles
+	}
 };
 
 void PreProcessor::defineHandler(std::string line) {
@@ -77,7 +119,9 @@ void PreProcessor::defineHandler(std::string line) {
 	//read pointer now lies on the first whitespace beyond the key.
 	//everything past this point is considered as the value, except trailing whitespace
 	std::getline(lineStream, value);
-	size_t start = value.find_first_of("\t"); //find the first non-whitespace character
+	size_t start = value.find_first_not_of("\t"); //find the first non-whitespace character
+
+
 	if (start != std::string::npos) {
 		value = value.substr(start);
 	} else {

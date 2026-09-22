@@ -57,6 +57,8 @@ class PreProcessor {
 
 		directiveType getLineDirective(std::string line); //figures out what type of directive the line is
 
+		bool searchFileEntryStack(std::string fileName);
+
 
 		void includeHandler(std::string line); //function to handle include directives
 		void defineHandler(std::string line);  //handles defines

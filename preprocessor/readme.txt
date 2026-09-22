@@ -11,7 +11,10 @@ the Include, Define and undefine Handlers:
     for quotations anymore. I do however plan to return and maybe reimplement this so you COULD allow whitespace, which means wrapping the
     argument in quotations, but that's for another time.
 
-
+Error codes:
+    So far I've implemented some rudimentary error codes for debugging, they are:
+    10: Cycle detected, specifically when a #include directive detects the same file within the file stack
+    20: Unable to open file for a variety of reasons, File doesnt exist, file not readable, or inaccessible 
 
 
 
