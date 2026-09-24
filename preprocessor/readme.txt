@@ -1,5 +1,14 @@
 this file outlines the design decisions for the preprocessor, as well as new concepts I encounter
 
+the main loop:
+    The primary function that handles most of the preprocessor logic loop is PreProcessor::processFile. this function handles the line-by-line execution flow,
+    it's main job is going by each line, detecting the directive for the line, calling the comment-stripping handler, and finally invoking the appropriate
+    directive (or non-directive) handler with that comment-stripped line. It also has the additional job of tracking the active file via the file stack (fileEntryStack). This is done to prevent
+    dependency cycles during #include directives. When 2 files try to include each other, or when multiple files include the same file, or if a file includes itself,
+     it could cause an infinite loop. the stack ensures that only one instance of a file can be processed on the stack. any time when the same file
+     is included when it's already on the stack, the program errors out.
+
+
 the Include, Define and undefine Handlers:
    if you notice, all 3 handlers take arguments without quotations, and this is simply because of a simplification trade off:
     the whole reason there's a need for it is to allow for special names that would otherwise wouldn't be supported. Take for
