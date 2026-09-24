@@ -196,13 +196,68 @@ void PreProcessor::processFile(std::string inputFile, std::string outputFile){
 
 }
 
+//checks if the char is a valid boundary char (to distinguish unique matches with substring matches)
+bool PreProcessor::isValidBoundary(char c) {
+	return c == ' '  ||  // Whitespace
+		   c == '('  ||  // Open parenthesis
+		   c == ')'  ||  // Close parenthesis
+		   c == '\t' ||  // Tab character
+		   c == '\n';    // Newline character
+}
+
+
 std::string PreProcessor::expandMacro(std::string line) {
 	//this function expands the macro from its compact to full form
 	//we have to check the ENTIRE macrotable and search the line for each entry
+	//so for each ENTRY, we need to search EVERY OCCURENCE of the word in the line
+
+	std::vector<std::string> macros = macroTable.getMacros();
 
 
+	//const means we aren't going to change the value (good for readability)
+	//string& means we use references rather than copy the values
+	for (const std::string& entry : macros) {
+
+		size_t matchPos = line.find(entry, 0); //search from the very first position
+		std::string value = macroTable.search(entry); //this feels  redundant if we just returned both key and value as std::pair...
+
+		//std::string::find returns the index of the first char of a match, or npos if no matches
+		while (matchPos != std::string::npos) {
+
+			//check char before match
+			bool beforeMatchValid = false;
+			if (matchPos == 0) {
+				beforeMatchValid = true;
+			} else {
+				char charBeforeMatch = line[matchPos - 1]; //check the character 1 index BEFORE the start pos
+				beforeMatchValid = isValidBoundary(charBeforeMatch);
+			}
+
+			//check char after match
+			bool afterMatchValid = false;
+			size_t indexAfterMatch = matchPos + entry.length(); //this puts the position to the char 1 index after the match
+			if (indexAfterMatch >= line.length()) {
+				afterMatchValid = true; //the next index after the match is beyond the boundary of the string
+			} else {
+				char charAfterMatch = line[indexAfterMatch];
+				afterMatchValid = isValidBoundary(charAfterMatch);
+			}
+
+			if (beforeMatchValid && afterMatchValid) {
+				//this is a valid occurrence of the macro, we can now expand it.
+				line.replace(matchPos, entry.length(), value);
 
 
+				matchPos = line.find(entry, matchPos + value.length()); //check the rest of the line AFTER the occurance, to avoid macro expansion
+			} else {
+
+
+				matchPos = line.find(entry, matchPos + 1); //check starting from the next position
+			}
+		}
+	}
+
+	return line;
 }
 
 std::string PreProcessor::stripComment(std::string line) {

@@ -65,6 +65,8 @@ class PreProcessor {
 		void defineHandler(std::string line);  //handles defines
 		void undefineHandler(std::string line); //handles undefines
 
+
+		bool isValidBoundary(char c);
 		std::string expandMacro(std::string line);
 		std::string stripComment(std::string line);
 };
