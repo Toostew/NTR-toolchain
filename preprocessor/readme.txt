@@ -19,6 +19,13 @@ std::vector<std::string> MacroTable::getMacros():
     into a vector to be returned. This cataloging occurs EVERY TIME THE FUNCTION IS CALLED, so it's wildly inefficient. ideally, you'd want to save the keys
     and have them persist in some way so that the lookup is instant O(1) and you dont have to constantly catalog them again. For now, I don't know how to do that
 
+Linux vs Windows endline (LF vs CRLF):
+    ran into a bizarre issue where the preprocessor was acting up because of hidden characters. Turns out Windows and Linux handle line breaks completely differently.
+    Windows uses Carriage Return Line Feed, CRLF (\r\n), while Linux only uses Line Feed LF (\n). When you read a Windows-created file in a Linux environment,
+    the parser sees the leftover carriage return (\r) and interprets it as a "^M" at the end of lines. This completely breaks string comparisons and parsers.
+    this broke some of the preprocessor logic especially the macro expander function, best way to prevent this is to keep reading and writing to files strict to one environment,
+    this case linux.
+
 Error codes:
     So far I've implemented some rudimentary error codes for debugging, they are:
     10: Cycle detected, specifically when a #include directive detects the same file within the file stack

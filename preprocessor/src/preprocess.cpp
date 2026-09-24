@@ -157,7 +157,7 @@ void PreProcessor::processFile(std::string inputFile, std::string outputFile){
 	std::string buffer;
 
 	//open inputStream and outputStream
-	std::ofstream writeFile(outputFile);
+	std::ofstream writeFile(outputFile); //this creates a new file of name outputFile
 
 	fileEntry wrappedEntry = {inputFile, std::make_unique<std::ifstream>(inputFile)};
 
@@ -173,21 +173,22 @@ void PreProcessor::processFile(std::string inputFile, std::string outputFile){
 		}
 
 		directiveType type = getLineDirective(buffer);
-
+		std::string strippedBuffer = stripComment(buffer); //this is the line without comments
 		switch(type) {
 			case directiveType::INCLUDE:
-				includeHandler(buffer);
+				includeHandler(strippedBuffer);
 				break;
 			case directiveType::DEFINE:
-				defineHandler(buffer);
+				defineHandler(strippedBuffer);
 				break;
 			case directiveType::UNDEFINE:
-				undefineHandler(buffer);
+				undefineHandler(strippedBuffer);
 				break;
 			case directiveType::NON_DIRECTIVE:
 				//here we do macro expansion.
-
-
+				std::string processedLine = expandMacro(strippedBuffer);
+				std::cout << processedLine << std::endl;
+				writeFile << processedLine << "\n";
 				break;
 
 		}
@@ -257,14 +258,32 @@ std::string PreProcessor::expandMacro(std::string line) {
 		}
 	}
 
+	std::cout << line;
 	return line;
 }
 
-std::string PreProcessor::stripComment(std::string line) {
+std::string PreProcessor::stripCommentSimple(std::string line) {
 	//if it starts with a "//", like this comment, remove the remainder of the line
-	//be careful because we only need to remove it wherever the // begins, till end of line
+	//ideally, the preprocessor can detect comments anywhere.
+	//this current simple version only strips comments that appear standalone
+	//this function cannot detect comments that are at the end of of valid non-comment lines (which is expected in every other language)
 
+	return ""; //literally nothing
 }
+
+//this function is run before handing off lines for processing, to strip the line of any comments
+std::string PreProcessor::stripComment(std::string line) {
+	//actually dynamically strip comments
+
+	size_t pos = line.find("//");
+	if (pos != std::string::npos) {
+		return line.erase();
+	}
+
+	//if npos, then there is no comment
+	return line;
+}
+
 
 
 

@@ -68,6 +68,7 @@ class PreProcessor {
 
 		bool isValidBoundary(char c);
 		std::string expandMacro(std::string line);
+		std::string stripCommentSimple(std::string line);
 		std::string stripComment(std::string line);
 };
 
